@@ -1,0 +1,44 @@
+package migrations
+
+import (
+    "leoferaderonugraha/go-backend-boilerplate/pkg/config"
+    "leoferaderonugraha/go-backend-boilerplate/pkg/database"
+)
+
+type Migration interface {
+    Up() error
+    Down() error
+}
+
+
+func Run(face string) {
+    cfg, err := config.LoadConfig("config.json")
+
+    if err != nil {
+        panic(err)
+    }
+
+    conn := database.New()
+    conn.Connect(cfg)
+
+    if err != nil {
+        panic(err)
+    }
+
+    listMigrations := make([]Migration, 0)
+    listMigrations = append(listMigrations, NewDropUserDeletedAt(conn.Db))
+
+    for _, migration := range listMigrations {
+        var err error
+
+        if face == "up" {
+            err = migration.Up()
+        } else {
+            err = migration.Down()
+        }
+
+        if err != nil {
+            panic(err)
+        }
+    }
+}
