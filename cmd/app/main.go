@@ -22,8 +22,12 @@ func main() {
     conn := database.New()
     conn.Connect(cfg)
 
-    conn.Db.AutoMigrate(&models.User{})
-    conn.Db.Migrator().DropColumn(&models.User{}, "deleted_at")
+    tx := conn.Db.Begin()
+    if tx.AutoMigrate(&models.User{}) != nil {
+        tx.Rollback()
+        panic(err)
+    }
+    tx.Commit()
 
     app := fiber.New()
 

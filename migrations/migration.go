@@ -26,7 +26,7 @@ func Run(face string) {
     }
 
     listMigrations := make([]Migration, 0)
-    listMigrations = append(listMigrations, NewDropUserDeletedAt(conn.Db))
+    // append list of migration here
 
     for _, migration := range listMigrations {
         var err error

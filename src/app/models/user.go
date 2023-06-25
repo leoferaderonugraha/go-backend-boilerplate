@@ -1,12 +1,7 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type User struct {
-	gorm.Model
-    DeletedAt gorm.DeletedAt `gorm:"softDelete:false"`
+    BaseModel
 
 	Name     string `json:"name"`
 	Email    string `json:"email"`
