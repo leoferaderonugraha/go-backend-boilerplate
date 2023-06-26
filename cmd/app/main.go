@@ -10,6 +10,7 @@ import (
     "leoferaderonugraha/go-backend-boilerplate/src/app/repositories"
 
     "github.com/gofiber/fiber/v2"
+    "gorm.io/gorm"
 )
 
 func main() {
@@ -22,12 +23,9 @@ func main() {
     conn := database.New()
     conn.Connect(cfg)
 
-    tx := conn.Db.Begin()
-    if tx.AutoMigrate(&models.User{}) != nil {
-        tx.Rollback()
-        panic(err)
-    }
-    tx.Commit()
+    database.WithTx(conn.Db, func (tx *gorm.DB) error {
+        return tx.AutoMigrate(&models.User{})
+    })
 
     app := fiber.New()
 
