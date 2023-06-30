@@ -1,0 +1,17 @@
+package repositories
+
+import (
+    _ "leoferaderonugraha/go-backend-boilerplate/src/app/models"
+
+    "gorm.io/gorm"
+)
+
+type ${repositoryName} struct {
+    db *gorm.DB
+}
+
+func New${repositoryName}(db *gorm.DB) *${repositoryName} {
+    return &${repositoryName} {
+        db: db,
+    }
+}

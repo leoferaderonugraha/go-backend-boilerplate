@@ -1,0 +1,15 @@
+package services
+
+import (
+    "leoferaderonugraha/go-backend-boilerplate/src/app/repositories"
+)
+
+type ${ServiceName} struct {
+    ${repositoryName} repositories.${RepositoryName}
+}
+
+func New${ServiceName}(${repositoryName} repositories.${RepositoryName}) *${ServiceName} {
+    return &${ServiceName} {
+        ${repositoryName}: ${repositoryName},
+    }
+}
