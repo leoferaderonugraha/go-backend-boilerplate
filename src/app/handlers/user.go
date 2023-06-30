@@ -26,7 +26,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 
 	user, err := h.userRegistrationService.RegisterUser(request.Name, request.Email, request.Password)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	response := models.UserRegistrationResponse{

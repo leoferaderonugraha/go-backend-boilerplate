@@ -11,7 +11,7 @@ type DbConnection struct {
     Db *gorm.DB
 }
 
-func New() *DbConnection {
+func NewDb() *DbConnection {
     return &DbConnection{}
 }
 

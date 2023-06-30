@@ -20,16 +20,16 @@ func main() {
         panic(err)
     }
 
-    conn := database.New()
+    conn := database.NewDb()
     conn.Connect(cfg)
 
-    database.WithTx(func (tx *gorm.DB) error {
+    database.WithTx(cfg, func (tx *gorm.DB) error {
         return tx.AutoMigrate(&models.User{})
     })
 
     app := fiber.New()
 
-    userRepo := repositories.New(conn.Db)
+    userRepo := repositories.NewUserRepository(conn.Db)
     userService := services.NewUserRegistrationService(*userRepo)
     userHandler := handlers.NewUserHandler(userService)
 
