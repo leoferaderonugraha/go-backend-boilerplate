@@ -23,7 +23,7 @@ func main() {
     conn := database.New()
     conn.Connect(cfg)
 
-    database.WithTx(conn.Db, func (tx *gorm.DB) error {
+    database.WithTx(func (tx *gorm.DB) error {
         return tx.AutoMigrate(&models.User{})
     })
 
