@@ -1,35 +1,40 @@
 package handlers
 
 import (
-    "leoferaderonugraha/go-backend-boilerplate/src/app/models"
     "leoferaderonugraha/go-backend-boilerplate/src/app/services"
+    e "leoferaderonugraha/go-backend-boilerplate/pkg/errors"
 
 	"github.com/gofiber/fiber/v2"
+    "errors"
 )
 
 type UserHandler struct {
-	userRegistrationService *services.UserRegistrationService
+	userService *services.UserService
 }
 
-func NewUserHandler(userRegistrationService *services.UserRegistrationService) *UserHandler {
+func NewUserHandler(userRegistrationService *services.UserService) *UserHandler {
 	return &UserHandler{
-		userRegistrationService: userRegistrationService,
+		userService: userRegistrationService,
 	}
 }
 
 func (h *UserHandler) Register(c *fiber.Ctx) error {
-	var request models.UserRegistrationRequest
+	var request services.UserRegistrationRequest
 	err := c.BodyParser(&request)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	user, err := h.userRegistrationService.RegisterUser(request.Name, request.Email, request.Password)
+	user, err := h.userService.Register(request.Name, request.Email, request.Password)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+        if errors.Is(err, e.USER_ALREADY_EXISTS) {
+            return fiber.NewError(fiber.StatusConflict, err.Error())
+        } else {
+            return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+        }
 	}
 
-	response := models.UserRegistrationResponse{
+	response := services.UserRegistrationResponse{
 		Name:  user.Name,
 		Email: user.Email,
 	}

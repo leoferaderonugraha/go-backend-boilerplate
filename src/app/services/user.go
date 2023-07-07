@@ -3,24 +3,36 @@ package services
 import (
     "leoferaderonugraha/go-backend-boilerplate/src/app/models"
     "leoferaderonugraha/go-backend-boilerplate/src/app/repositories"
+    e "leoferaderonugraha/go-backend-boilerplate/pkg/errors"
 
-	"errors"
 )
 
-type UserRegistrationService struct {
+type UserService struct {
 	userRepository repositories.UserRepository
 }
 
-func NewUserRegistrationService(userRepository repositories.UserRepository) *UserRegistrationService {
-	return &UserRegistrationService{
+func NewUserRegistrationService(userRepository repositories.UserRepository) *UserService {
+	return &UserService{
 		userRepository: userRepository,
 	}
 }
 
-func (s *UserRegistrationService) RegisterUser(name, email, password string) (*models.User, error) {
+type UserRegistrationRequest struct {
+    Name     string `json:"name"`
+    Email    string `json:"email"`
+    Password string `json:"password"`
+}
+
+type UserRegistrationResponse struct {
+    Name  string `json:"name"`
+    Email string `json:"email"`
+}
+
+func (s *UserService) Register(name, email, password string) (*models.User, error) {
 	existingUser, _ := s.userRepository.GetUserByEmail(email)
+
 	if existingUser != nil {
-		return nil, errors.New("user with the given email already exists")
+		return nil, e.USER_ALREADY_EXISTS
 	}
 
 	user := &models.User{
@@ -30,6 +42,7 @@ func (s *UserRegistrationService) RegisterUser(name, email, password string) (*m
 	}
 
 	err := s.userRepository.Save(user)
+
 	if err != nil {
 		return nil, err
 	}
