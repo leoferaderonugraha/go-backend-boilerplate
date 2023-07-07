@@ -5,12 +5,15 @@ import (
     "leoferaderonugraha/go-backend-boilerplate/src/app/handlers"
 )
 
-func TestRoutes(app *fiber.App) {
+func RegisterTestRoutes(app *fiber.App, handler *handlers.RestrictedHandler) {
     app.Get("/test", func(c *fiber.Ctx) error {
         return c.SendString("Hello, World")
     })
 }
 
 func RegisterUserRoutes(app *fiber.App, handler *handlers.UserHandler) {
-    app.Post("/register", handler.Register)
+    group := app.Group("/user")
+    group.Post("/register", handler.Register)
+    group.Get("/:id", handler.Details)
+    group.Put("/:id", handler.Update)
 }

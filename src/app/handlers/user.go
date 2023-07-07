@@ -1,21 +1,26 @@
 package handlers
 
 import (
+    "leoferaderonugraha/go-backend-boilerplate/src/app/repositories"
     "leoferaderonugraha/go-backend-boilerplate/src/app/services"
     e "leoferaderonugraha/go-backend-boilerplate/pkg/errors"
 
 	"github.com/gofiber/fiber/v2"
+    "gorm.io/gorm"
     "errors"
 )
 
 type UserHandler struct {
-	userService *services.UserService
+	service *services.UserService
 }
 
-func NewUserHandler(userRegistrationService *services.UserService) *UserHandler {
-	return &UserHandler{
-		userService: userRegistrationService,
-	}
+func NewUserHandler(db *gorm.DB) *UserHandler {
+    repo := repositories.NewUserRepository(db)
+    svc := services.NewUserRegistrationService(*repo)
+
+    return &UserHandler{
+        service: svc,
+    }
 }
 
 func (h *UserHandler) Register(c *fiber.Ctx) error {
@@ -25,7 +30,7 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	user, err := h.userService.Register(request.Name, request.Email, request.Password)
+	user, err := h.service.Register(request.Name, request.Email, request.Password)
 	if err != nil {
         if errors.Is(err, e.USER_ALREADY_EXISTS) {
             return fiber.NewError(fiber.StatusConflict, err.Error())
@@ -34,14 +39,70 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
         }
 	}
 
-	response := services.UserRegistrationResponse{
-		Name:  user.Name,
-		Email: user.Email,
-	}
-
-	return c.JSON(response)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+        "name": user.Name,
+        "email": user.Email,
+    })
 }
 
-func (h *UserHandler) Login(c *fiber.Ctx) error {
-    return nil
+func (h *UserHandler) Details(c *fiber.Ctx) error {
+    id := c.Params("id")
+    if id == "" {
+        return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+    }
+
+    user, err := h.service.Details(id)
+    if err != nil {
+        if errors.Is(err, e.USER_NOT_FOUND) {
+            return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+                "message": err.Error(),
+            })
+        } else {
+            return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+                "message": "Something went wrong",
+            })
+        }
+    }
+
+    return c.Status(fiber.StatusOK).JSON(fiber.Map{
+        "name": user.Name,
+        "email": user.Email,
+    })
+}
+
+func (h *UserHandler) Update(c *fiber.Ctx) error {
+    id := c.Params("id")
+
+    if id == "" {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "message": "Bad Request",
+        })
+    }
+
+    data := make(map[string]any)
+    if err := c.BodyParser(&data); err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+            "message": err.Error(),
+        })
+    }
+
+
+    user, err := h.service.Update(id, data)
+
+    if err != nil {
+        if errors.Is(err, e.USER_NOT_FOUND) {
+            return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+                "message": err.Error(),
+            })
+        } else {
+            return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+                "message": "Something went wrong",
+            })
+        }
+    }
+
+    return c.Status(fiber.StatusOK).JSON(fiber.Map{
+        "name": user.Name,
+        "email": user.Email,
+    })
 }

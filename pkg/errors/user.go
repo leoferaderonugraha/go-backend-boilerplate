@@ -14,4 +14,5 @@ func (e *UserError) Error() string {
 
 var (
     USER_ALREADY_EXISTS = NewUserError("User already exists")
+    USER_NOT_FOUND = NewUserError("User not found")
 )

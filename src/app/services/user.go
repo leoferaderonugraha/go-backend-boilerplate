@@ -8,12 +8,12 @@ import (
 )
 
 type UserService struct {
-	userRepository repositories.UserRepository
+	repository repositories.UserRepository
 }
 
-func NewUserRegistrationService(userRepository repositories.UserRepository) *UserService {
+func NewUserRegistrationService(repository repositories.UserRepository) *UserService {
 	return &UserService{
-		userRepository: userRepository,
+		repository: repository,
 	}
 }
 
@@ -23,13 +23,12 @@ type UserRegistrationRequest struct {
     Password string `json:"password"`
 }
 
-type UserRegistrationResponse struct {
-    Name  string `json:"name"`
-    Email string `json:"email"`
+type UserDetailRequest struct {
+    Id string `json:"id"`
 }
 
 func (s *UserService) Register(name, email, password string) (*models.User, error) {
-	existingUser, _ := s.userRepository.GetUserByEmail(email)
+	existingUser, _ := s.repository.GetUserByEmail(email)
 
 	if existingUser != nil {
 		return nil, e.USER_ALREADY_EXISTS
@@ -41,7 +40,7 @@ func (s *UserService) Register(name, email, password string) (*models.User, erro
 		Password:  password,
 	}
 
-	err := s.userRepository.Save(user)
+	err := s.repository.Save(user)
 
 	if err != nil {
 		return nil, err
@@ -50,3 +49,40 @@ func (s *UserService) Register(name, email, password string) (*models.User, erro
 	return user, nil
 }
 
+func (s *UserService) Details(id string) (*models.User, error) {
+    user, err := s.repository.GetUserById(id)
+
+    if err != nil {
+        return nil, err
+    }
+
+    return user, nil
+}
+
+func (s *UserService) Update(id string, data map[string]any) (*models.User, error) {
+    user, err := s.repository.GetUserById(id)
+
+    if err != nil {
+        return nil, err
+    }
+
+    if data["name"] != nil {
+        user.Name = data["name"].(string)
+    }
+    
+    if data["email"] != nil {
+        user.Email = data["email"].(string)
+    }
+
+    if data["password"] != nil {
+        user.Password = data["password"].(string)
+    }
+
+    err = s.repository.Update(user)
+
+    if err != nil {
+        return nil, err
+    }
+
+    return user, nil
+}
