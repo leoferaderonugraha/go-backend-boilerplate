@@ -9,14 +9,20 @@ import (
 
     "github.com/gofiber/fiber/v2"
     "gorm.io/gorm"
+    "fmt"
 )
 
 func main() {
-    cfg, err := config.LoadConfig("config.json")
+    cfg, err := config.GetConfig()
 
     if err != nil {
         panic(err)
     }
+
+    fmt.Println("Hello, World!")
+    fmt.Println(cfg.DatabaseURL)
+
+    return
 
     conn := database.NewDb()
     conn.Connect(cfg)

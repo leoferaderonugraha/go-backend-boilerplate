@@ -1,28 +1,37 @@
 package config
 
 import (
-    "io/ioutil"
+    "os"
     "encoding/json"
+    "fmt"
 )
 
 type Config struct {
 	DatabaseURL string `json:"database_url"`
+    RedisURL string `json:"redis_url"`
+    RedisPassword string `json:"redis_password"`
+    RedisDB int `json:"redis_db"`
 }
 
-func LoadConfig(path string) (*Config, error) {
-    // Load json based configuration
+var instance *Config
 
-    file, err := ioutil.ReadFile(path)
+func GetConfig() (*Config, error) {
+    // Could only be instantiated once
 
-    if err != nil {
-        return nil, err
+    if instance == nil {
+        fmt.Println("Reading config.json")
+        configData, err := os.ReadFile("config.json")
+
+        if err != nil {
+            return nil, err
+        }
+
+        instance = &Config{}
+
+        if err := json.Unmarshal(configData, instance); err != nil {
+            return nil, err
+        }
     }
 
-    config := &Config{}
-    if err := json.Unmarshal(file, config); err != nil {
-        return nil, err
-    }
-
-	return config, nil
+    return instance, nil
 }
-

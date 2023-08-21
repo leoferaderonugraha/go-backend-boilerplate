@@ -12,13 +12,13 @@ type Migration interface {
 
 
 func Run(face string) {
-    cfg, err := config.LoadConfig("config.json")
+    cfg, err := config.GetConfig()
 
     if err != nil {
         panic(err)
     }
 
-    conn := database.New()
+    conn := database.NewDb()
     conn.Connect(cfg)
 
     if err != nil {
