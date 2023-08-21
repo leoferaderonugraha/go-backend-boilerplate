@@ -3,30 +3,32 @@ package config
 import (
     "os"
     "encoding/json"
-    "fmt"
 )
 
-type Config struct {
-	DatabaseURL string `json:"database_url"`
-    RedisURL string `json:"redis_url"`
-    RedisPassword string `json:"redis_password"`
-    RedisDB int `json:"redis_db"`
+/* Currently only support for primitive data types */
+type JSON_SUPPORTED_TYPES interface {
+    string |
+    int |
+    int32 |
+    int64 |
+    float32 |
+    float64 |
+    bool
 }
 
-var instance *Config
+var instance *map[string]any
 
-func GetConfig() (*Config, error) {
+func loadConfig() (*map[string]any, error) {
     // Could only be instantiated once
 
     if instance == nil {
-        fmt.Println("Reading config.json")
         configData, err := os.ReadFile("config.json")
 
         if err != nil {
             return nil, err
         }
 
-        instance = &Config{}
+        instance = new(map[string]any)
 
         if err := json.Unmarshal(configData, instance); err != nil {
             return nil, err
@@ -34,4 +36,18 @@ func GetConfig() (*Config, error) {
     }
 
     return instance, nil
+}
+
+func Get[T JSON_SUPPORTED_TYPES](key string, fallback T) T {
+    cfg, err := loadConfig()
+
+    if err != nil {
+        panic(err)
+    }
+
+    if val, exists := (*cfg)[key]; exists {
+        return val.(T)
+    }
+    
+    return fallback
 }

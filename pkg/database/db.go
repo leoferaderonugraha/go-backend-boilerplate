@@ -15,8 +15,14 @@ func NewDb() *DbConnection {
     return &DbConnection{}
 }
 
-func (db *DbConnection) Connect(config *config.Config) (*gorm.DB, error) {
-    dbConn, err := gorm.Open(postgres.Open(config.DatabaseURL), &gorm.Config{})
+func (db *DbConnection) Connect() (*gorm.DB, error) {
+    url := config.Get[string]("database_url", "")
+
+    if url == "" {
+        panic("Database URL is not set")
+    }
+
+    dbConn, err := gorm.Open(postgres.Open(url), &gorm.Config{})
 
     if err != nil {
         return nil, err

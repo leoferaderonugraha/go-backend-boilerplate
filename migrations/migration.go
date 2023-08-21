@@ -1,10 +1,5 @@
 package migrations
 
-import (
-    "leoferaderonugraha/go-backend-boilerplate/pkg/config"
-    "leoferaderonugraha/go-backend-boilerplate/pkg/database"
-)
-
 type Migration interface {
     Up() error
     Down() error
@@ -12,19 +7,6 @@ type Migration interface {
 
 
 func Run(face string) {
-    cfg, err := config.GetConfig()
-
-    if err != nil {
-        panic(err)
-    }
-
-    conn := database.NewDb()
-    conn.Connect(cfg)
-
-    if err != nil {
-        panic(err)
-    }
-
     listMigrations := make([]Migration, 0)
     // append list of migration here
 

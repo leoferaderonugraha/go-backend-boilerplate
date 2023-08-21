@@ -2,32 +2,19 @@ package main
 
 import (
     "leoferaderonugraha/go-backend-boilerplate/src/app/models"
-    "leoferaderonugraha/go-backend-boilerplate/pkg/config"
     "leoferaderonugraha/go-backend-boilerplate/pkg/database"
     "leoferaderonugraha/go-backend-boilerplate/pkg/routes"
     "leoferaderonugraha/go-backend-boilerplate/src/app/handlers"
 
     "github.com/gofiber/fiber/v2"
     "gorm.io/gorm"
-    "fmt"
 )
 
 func main() {
-    cfg, err := config.GetConfig()
-
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println("Hello, World!")
-    fmt.Println(cfg.DatabaseURL)
-
-    return
-
     conn := database.NewDb()
-    conn.Connect(cfg)
+    conn.Connect()
 
-    database.WithTx(cfg, func (tx *gorm.DB) error {
+    database.WithTx(func (tx *gorm.DB) error {
         return tx.AutoMigrate(&models.User{})
     })
 

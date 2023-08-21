@@ -1,4 +1,0 @@
-{
-    "database_url": "postgres://postgres:postgres@localhost:5432/postgres",
-    "jwt_signkey": "secret"
-}
